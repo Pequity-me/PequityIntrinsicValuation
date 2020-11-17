@@ -1,14 +1,18 @@
 
 function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
+  I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
+  I_FixedCost,
   I_TTMNetIncome, I_TTMDepreciation, I_AccPayable, I_AccReceivable, I_InventoryChange,
   I_TTMPPEInvestment, 
   I_TTMDebtIssuance, I_TTMDebtRepayment, I_TTMStockIssuance, I_TTMStockRepayment, I_TTMDistributedDividends,
   I_T_1YearNetIncome, I_T_2YearNetIncome)
   
+  %%%%%%%%%%%%%Load parameters%%%%%%%%%%%%%%
   ModelConstants;
   ModelParameters;
   SimulationParameters;
-
+  
+  %%%%%%%%%%%%%Cost of Capital calculations%%%%%%%%%%%%%%
   V_CountryDeafultSpread = P_10YearCountryGvmtBondYieldUSD - P_10YearUSGvmtBondYield;
   V_RiskFreeRate = P_10YearCountryGvmtBondYield - V_CountryDeafultSpread;
 
@@ -26,6 +30,8 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   
   V_CostOfCapitalLow = (V_CostOfEquityLow*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
   V_CostOfCapitalHigh = (V_CostOfEquityHigh*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
+
+  %%%%%%%%%%%%%Income to Cashflow%%%%%%%%%%%%%%
     
   V_TTMCashFlowOperations = I_TTMNetIncome + I_TTMDepreciation + I_AccPayable - I_AccReceivable - I_InventoryChange;
   V_TTMCashFlowInvesting = - I_TTMPPEInvestment;
@@ -33,25 +39,44 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   
   V_TTMNetCashFlow = V_TTMCashFlowOperations + V_TTMCashFlowInvesting + V_TTMCashFlowFinancing;
 
-  V_EstimatedGrowthRate = sqrt(((I_TTMNetIncome/I_T_1YearNetIncome)-1)*((I_T_1YearNetIncome/I_T_2YearNetIncome)-1))
+  %%%%%%%%%%%%%Growth Estimations%%%%%%%%%%%%%%
+
+  V_EstimatedRevenueGrowthRate = sqrt(((I_TTMRevenue/I_T_1YearRevenue)-1)*((I_T_1YearRevenue/I_T_2YearRevenue)-1));
+  V_EstimatedIncomeGrowthRate = sqrt(((I_TTMNetIncome/I_T_1YearNetIncome)-1)*((I_T_1YearNetIncome/I_T_2YearNetIncome)-1));
+  %Assume Cash flow grows with the same rate as Income.
+  V_EstimatedCashFlowGrowthRate = V_EstimatedIncomeGrowthRate; 
 
   %%%%%%%%%%%%%Past Period%%%%%%%%%%%%%%
   PastTimeLine = -P_PastYearsRecoreded:0;
+  %Revenue%
+
+  V_PastRevenueSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastRevenueSeries(1) = I_T_2YearNetIncome;
+  V_PastRevenueSeries(2) = I_T_1YearNetIncome;
+  V_PastRevenueSeries(3) = I_TTMNetIncome;
+  
+  V_PastRevenueGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastRevenueGrowthRateSeries(:) = V_EstimatedRevenueGrowthRate;
+  
+  %Income%
+
   V_PastCashFlowSeries = zeros(1, P_PastYearsRecoreded + 1);
   V_PastCashFlowSeries(1) = I_T_2YearNetIncome;
   V_PastCashFlowSeries(2) = I_T_1YearNetIncome;
   V_PastCashFlowSeries(3) = I_TTMNetIncome;
   
-  V_PastGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastGrowthRateSeries(:) = V_EstimatedGrowthRate;
+  V_PastCashFlowGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastCashFlowGrowthRateSeries(:) = V_EstimatedCashFlowGrowthRate;
 
   %%%%%%%%%%%%%Growth Period%%%%%%%%%%%%%%  
+  
+  
   GrowthPeriodTimeLine = 0:P_NumOfGrowthYears;
   V_GrowthCashFlowSeries = zeros(1, P_NumOfGrowthYears + 1);
   V_GrowthCashFlowSeries(1) = V_PastCashFlowSeries(end);  
 
   V_GrowthPeriodGrowthRateSeries = zeros(1, P_NumOfGrowthYears + 1);
-  V_GrowthPeriodGrowthRateSeries(:) = V_EstimatedGrowthRate ;
+  V_GrowthPeriodGrowthRateSeries(:) = V_EstimatedCashFlowGrowthRate ;
   
   for n = 2:length(V_GrowthCashFlowSeries)
     V_GrowthCashFlowSeries(n) =(V_GrowthCashFlowSeries(n-1)*(1+V_GrowthPeriodGrowthRateSeries(n)));
@@ -63,8 +88,8 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   V_WindDownCashFlowSeries(1) = V_GrowthCashFlowSeries(end);  
 
   V_WindDownPeriodGrowthRateSeries = zeros(1, P_NumOfWindDownYears + 1);
-  YearlyDropInGrowth = (V_EstimatedGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears
-  V_WindDownPeriodGrowthRateSeries(:) =  V_EstimatedGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate
+  YearlyDropInGrowth = (V_EstimatedCashFlowGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears
+  V_WindDownPeriodGrowthRateSeries(:) =  V_EstimatedCashFlowGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate
   
   for n = 2:length(V_GrowthCashFlowSeries)
     V_WindDownCashFlowSeries(n) =(V_WindDownCashFlowSeries(n-1)*(1+V_WindDownPeriodGrowthRateSeries(n)));
@@ -95,7 +120,7 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   ylabel ("Egp");
 
   subplot(1,2,2);  
-  plot(  PastTimeLine, V_PastGrowthRateSeries * 100, ";Past Growth Rate;", "marker", '+', "linewidth", 5,
+  plot(  PastTimeLine, V_PastCashFlowGrowthRateSeries * 100, ";Past Growth Rate;", "marker", '+', "linewidth", 5,
   GrowthPeriodTimeLine, V_GrowthPeriodGrowthRateSeries * 100, ";Projected Growth Period Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
   WindDownPeriodTimeLine, V_WindDownPeriodGrowthRateSeries * 100, ";Projected Wind Down Period Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
   TerminalPeriodTimeLine, V_TerminalPeriodGrowthRateSeries * 100, ";Projected Terminal Period Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", "-."
