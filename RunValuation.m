@@ -2,10 +2,12 @@
 function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
   I_FixedCost,
-  I_TTMNetIncome, I_TTMDepreciation, I_AccPayable, I_AccReceivable, I_InventoryChange,
-  I_TTMPPEInvestment, 
-  I_TTMDebtIssuance, I_TTMDebtRepayment, I_TTMStockIssuance, I_TTMStockRepayment, I_TTMDistributedDividends,
-  I_T_1YearNetIncome, I_T_2YearNetIncome)
+  I_TTMVariableCost, I_T_1YearVariableCost, I_T_2YearVariableCost
+  )
+  
+  %Revenue = Cost + Income
+  %Revenue = FixedCost + VariableCost + CashFlow + IncomeDelta(Assume = 0)
+  %CashFlow = Revenue - FixedCost - VariableCost
   
   %%%%%%%%%%%%%Load parameters%%%%%%%%%%%%%%
   ModelConstants;
@@ -31,21 +33,14 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   V_CostOfCapitalLow = (V_CostOfEquityLow*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
   V_CostOfCapitalHigh = (V_CostOfEquityHigh*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
 
-  %%%%%%%%%%%%%Income to Cashflow%%%%%%%%%%%%%%
-    
-  V_TTMCashFlowOperations = I_TTMNetIncome + I_TTMDepreciation + I_AccPayable - I_AccReceivable - I_InventoryChange;
-  V_TTMCashFlowInvesting = - I_TTMPPEInvestment;
-  V_TTMCashFlowFinancing = I_TTMDebtIssuance - I_TTMDebtRepayment + I_TTMStockIssuance - I_TTMStockRepayment - I_TTMDistributedDividends;
-  
-  V_TTMNetCashFlow = V_TTMCashFlowOperations + V_TTMCashFlowInvesting + V_TTMCashFlowFinancing;
-
   %%%%%%%%%%%%%Growth Estimations%%%%%%%%%%%%%%
 
-  V_EstimatedRevenueGrowthRate = sqrt(((I_TTMRevenue/I_T_1YearRevenue)-1)*((I_T_1YearRevenue/I_T_2YearRevenue)-1))
-  V_EstimatedIncomeGrowthRate = sqrt(((I_TTMNetIncome/I_T_1YearNetIncome)-1)*((I_T_1YearNetIncome/I_T_2YearNetIncome)-1));
-  %Assume Cash flow grows with the same rate as Income.
-  V_EstimatedCashFlowGrowthRate = V_EstimatedIncomeGrowthRate
+  V_EstimatedRevenueGrowthRate = sqrt((I_TTMRevenue/I_T_1YearRevenue)*(I_T_1YearRevenue/I_T_2YearRevenue)) - 1
+  V_EstimatedVariableCostGrowthRate = sqrt((I_TTMVariableCost/I_T_1YearVariableCost)*(I_T_1YearVariableCost/I_T_2YearVariableCost)) - 1
 
+  if(V_EstimatedRevenueGrowthRate < P_TerminalGrowthRate)
+    P_TerminalGrowthRate = V_EstimatedRevenueGrowthRate + EPSILON;
+  endif
   %%%%%%%%%%%%%Past Period%%%%%%%%%%%%%%
   PastTimeLine = -P_PastYearsRecoreded:0;
   %Revenue%
@@ -58,16 +53,19 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   V_PastRevenueGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
   V_PastRevenueGrowthRateSeries(:) = V_EstimatedRevenueGrowthRate;
   
-  %CashFlow%
-  %TODO:FIX%
-  V_PastCashFlowSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastCashFlowSeries(1) = I_T_2YearNetIncome;
-  V_PastCashFlowSeries(2) = I_T_1YearNetIncome;
-  V_PastCashFlowSeries(3) = I_TTMNetIncome;
+  %VariableCost%
+  V_PastVariableCostSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastVariableCostSeries(1) = I_T_2YearVariableCost;
+  V_PastVariableCostSeries(2) = I_T_1YearVariableCost;
+  V_PastVariableCostSeries(3) = I_TTMVariableCost;
   
-  V_PastCashFlowGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastCashFlowGrowthRateSeries(:) = V_EstimatedCashFlowGrowthRate;
+  V_PastVariableCostGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastVariableCostGrowthRateSeries(:) = V_EstimatedVariableCostGrowthRate;
 
+  %CashFlow%
+  V_PastCashFlowSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastCashFlowSeries = V_PastRevenueSeries - V_PastVariableCostSeries - I_FixedCost;
+  
   %%%%%%%%%%%%%Growth Period%%%%%%%%%%%%%%  
   
   
@@ -85,16 +83,20 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
     V_GrowthRevenueSeries(n) =(V_GrowthRevenueSeries(n-1)*(1+V_GrowthPeriodRevenueGrowthRateSeries(n)));
   end
 
+  %VariableCost%
+  V_GrowthVariableCostSeries = zeros(1, P_NumOfGrowthYears + 1);
+  V_GrowthVariableCostSeries(1) = V_PastVariableCostSeries(end);  
+
+  V_GrowthPeriodVariableCostGrowthRateSeries = zeros(1, P_NumOfGrowthYears + 1);
+  V_GrowthPeriodVariableCostGrowthRateSeries(:) = V_EstimatedVariableCostGrowthRate ;
+  
+  for n = 2:length(V_GrowthVariableCostSeries)
+    V_GrowthVariableCostSeries(n) =(V_GrowthVariableCostSeries(n-1)*(1+V_GrowthPeriodVariableCostGrowthRateSeries(n)));
+  end
+
   %CashFlow%
   V_GrowthCashFlowSeries = zeros(1, P_NumOfGrowthYears + 1);
-  V_GrowthCashFlowSeries(1) = V_PastCashFlowSeries(end);  
-
-  V_GrowthPeriodCashFlowGrowthRateSeries = zeros(1, P_NumOfGrowthYears + 1);
-  V_GrowthPeriodCashFlowGrowthRateSeries(:) = V_EstimatedCashFlowGrowthRate ;
-  
-  for n = 2:length(V_GrowthCashFlowSeries)
-    V_GrowthCashFlowSeries(n) =(V_GrowthCashFlowSeries(n-1)*(1+V_GrowthPeriodCashFlowGrowthRateSeries(n)));
-  end
+  V_GrowthCashFlowSeries = V_GrowthRevenueSeries - V_GrowthVariableCostSeries - I_FixedCost;
 
   %%%%%%%%%%%%%WindDown Period%%%%%%%%%%%%%%  
   WindDownPeriodTimeLine = P_NumOfGrowthYears:P_NumOfGrowthYears + P_NumOfWindDownYears;
@@ -111,17 +113,21 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
     V_WindDownRevenueSeries(n) =(V_WindDownRevenueSeries(n-1)*(1+V_WindDownPeriodRevenueGrowthRateSeries(n)));
   end
 
+  %VariableCost%
+  V_WindDownVariableCostSeries = zeros(1, P_NumOfWindDownYears + 1);
+  V_WindDownVariableCostSeries(1) = V_GrowthVariableCostSeries(end);  
+
+  V_WindDownPeriodVariableCostGrowthRateSeries = zeros(1, P_NumOfWindDownYears + 1);
+  YearlyDropInGrowth = (V_EstimatedVariableCostGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
+  V_WindDownPeriodVariableCostGrowthRateSeries(:) =  V_EstimatedVariableCostGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate;
+  
+  for n = 2:length(V_GrowthVariableCostSeries)
+    V_WindDownVariableCostSeries(n) =(V_WindDownVariableCostSeries(n-1)*(1+V_WindDownPeriodVariableCostGrowthRateSeries(n)));
+  end
+
   %CashFlow%
   V_WindDownCashFlowSeries = zeros(1, P_NumOfWindDownYears + 1);
-  V_WindDownCashFlowSeries(1) = V_GrowthCashFlowSeries(end);  
-
-  V_WindDownPeriodCashFlowGrowthRateSeries = zeros(1, P_NumOfWindDownYears + 1);
-  YearlyDropInGrowth = (V_EstimatedCashFlowGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
-  V_WindDownPeriodCashFlowGrowthRateSeries(:) =  V_EstimatedCashFlowGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate;
-  
-  for n = 2:length(V_GrowthCashFlowSeries)
-    V_WindDownCashFlowSeries(n) =(V_WindDownCashFlowSeries(n-1)*(1+V_WindDownPeriodCashFlowGrowthRateSeries(n)));
-  end
+  V_WindDownCashFlowSeries = V_WindDownRevenueSeries - V_WindDownVariableCostSeries - I_FixedCost;
 
   %%%%%%%%%%%%%Terminal Period%%%%%%%%%%%%%%  
   TerminalPeriodTimeLine = P_NumOfWindDownYears+P_NumOfGrowthYears:P_PlotPeriod;
@@ -137,45 +143,56 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
     V_TerminalRevenueSeries(n) =(V_TerminalRevenueSeries(n-1)*(1+V_TerminalPeriodRevenueGrowthRateSeries(n)));
   end
 
-  %CashFlow%
-  V_TerminalCashFlowSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
-  V_TerminalCashFlowSeries(1) = V_WindDownCashFlowSeries(end);
+  %VariableCost%
+  V_TerminalVariableCostSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalVariableCostSeries(1) = V_WindDownVariableCostSeries(end);
 
-  V_TerminalPeriodCashFlowGrowthRateSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
-  V_TerminalPeriodCashFlowGrowthRateSeries(:) = P_TerminalGrowthRate ;
+  V_TerminalPeriodVariableCostGrowthRateSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalPeriodVariableCostGrowthRateSeries(:) = P_TerminalGrowthRate ;
 
-  for n = 2:length(V_TerminalCashFlowSeries)
-    V_TerminalCashFlowSeries(n) =(V_TerminalCashFlowSeries(n-1)*(1+V_TerminalPeriodCashFlowGrowthRateSeries(n)));
+  for n = 2:length(V_TerminalVariableCostSeries)
+    V_TerminalVariableCostSeries(n) =(V_TerminalVariableCostSeries(n-1)*(1+V_TerminalPeriodVariableCostGrowthRateSeries(n)));
   end
 
+  %CashFlow%
+  V_TerminalCashFlowSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalCashFlowSeries = V_TerminalRevenueSeries - V_TerminalVariableCostSeries - I_FixedCost;
   
   %%%%%%%%%%%%%Plotting%%%%%%%%%%%%%%  
 
   figure(1);  
   plot(PastTimeLine, V_PastRevenueSeries, ";Past Revenue;", "marker", '+', "linewidth", 5, 
+  PastTimeLine, V_PastVariableCostSeries, ";Past Variable Cost;", "marker", '+', "linewidth", 5, 
   PastTimeLine, V_PastCashFlowSeries, ";Past Cash Flow;", "marker", '+', "linewidth", 5, 
   GrowthPeriodTimeLine, V_GrowthRevenueSeries, ";Projected Growth Period Revenue;", "marker", '+', "linewidth", 5, "linestyle", ":",
+  GrowthPeriodTimeLine, V_GrowthVariableCostSeries, ";Projected Growth Period Variable Cost;", "marker", '+', "linewidth", 5, "linestyle", ":",
   GrowthPeriodTimeLine, V_GrowthCashFlowSeries, ";Projected Growth Period Cash Flow;", "marker", '+', "linewidth", 5, "linestyle", ":",
   WindDownPeriodTimeLine, V_WindDownRevenueSeries, ";Projected Wind Down Period Revenue;", "marker", '+', "linewidth", 5, "linestyle", ":",
+  WindDownPeriodTimeLine, V_WindDownVariableCostSeries, ";Projected Wind Down Period Variable Cost;", "marker", '+', "linewidth", 5, "linestyle", ":",
   WindDownPeriodTimeLine, V_WindDownCashFlowSeries, ";Projected Wind Down Period Cash Flow;", "marker", '+', "linewidth", 5, "linestyle", ":",
   TerminalPeriodTimeLine, V_TerminalRevenueSeries, ";Projected Terminal Growth Revenue;", "marker", '+', "linewidth", 5, "linestyle", "-.",
+  TerminalPeriodTimeLine, V_TerminalVariableCostSeries, ";Projected Terminal Growth Variable Cost;", "marker", '+', "linewidth", 5, "linestyle", "-.",
   TerminalPeriodTimeLine, V_TerminalCashFlowSeries, ";Projected Terminal Growth Cash Flow;", "marker", '+', "linewidth", 5, "linestyle", "-."
   );
   xlabel ("Years");
   ylabel ("Egp");
-
+  grid;
+  legend ("location", "northwest");
+  
   figure(2);  
   plot(  PastTimeLine, V_PastRevenueGrowthRateSeries * 100, ";Past Revenue Growth Rate;", "marker", '+', "linewidth", 5,
-  PastTimeLine, V_PastCashFlowGrowthRateSeries * 100, ";Past Cash Flow Growth Rate;", "marker", '+', "linewidth", 5,
+  PastTimeLine, V_PastVariableCostGrowthRateSeries * 100, ";Past Variable Cost Growth Rate;", "marker", '+', "linewidth", 5,
   GrowthPeriodTimeLine, V_GrowthPeriodRevenueGrowthRateSeries * 100, ";Projected Growth Period Revenue Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
-  GrowthPeriodTimeLine, V_GrowthPeriodCashFlowGrowthRateSeries * 100, ";Projected Growth Period Cash FlowGrowth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
+  GrowthPeriodTimeLine, V_GrowthPeriodVariableCostGrowthRateSeries * 100, ";Projected Growth Period Variable CostGrowth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
   WindDownPeriodTimeLine, V_WindDownPeriodRevenueGrowthRateSeries * 100, ";Projected Wind Down Period Revenue Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
-  WindDownPeriodTimeLine, V_WindDownPeriodCashFlowGrowthRateSeries * 100, ";Projected Wind Down Period Cash Flow Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
+  WindDownPeriodTimeLine, V_WindDownPeriodVariableCostGrowthRateSeries * 100, ";Projected Wind Down Period Variable Cost Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
   TerminalPeriodTimeLine, V_TerminalPeriodRevenueGrowthRateSeries * 100, ";Projected Terminal Period Revenue Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", "-.",
-  TerminalPeriodTimeLine, V_TerminalPeriodCashFlowGrowthRateSeries * 100, ";Projected Terminal Period Cash Flow Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", "-."
+  TerminalPeriodTimeLine, V_TerminalPeriodVariableCostGrowthRateSeries * 100, ";Projected Terminal Period Variable Cost Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", "-."
   );
   xlabel ("Years");
   ylabel ("%");
+  grid;
+  legend ("location", "northwest");
 
   
 endfunction
