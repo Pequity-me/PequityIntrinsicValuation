@@ -1,2 +1,2 @@
 P_PastYearsRecoreded = 2;
-P_PlotPeriod = 15;
+P_PlotPeriod = 30;

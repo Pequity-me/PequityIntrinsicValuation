@@ -1,5 +1,5 @@
 
-function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
+function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
   I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
   I_FixedCost,
   I_TTMVariableCost, I_T_1YearVariableCost, I_T_2YearVariableCost
@@ -30,8 +30,8 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   V_CostOfEquityLow = V_RiskFreeRate+V_CountryRiskPremiumLow+(V_CompanyRelativeRisk*C_USRiskPremiumLow);
   V_CostOfEquityHigh = V_RiskFreeRate+V_CountryRiskPremiumHigh+(V_CompanyRelativeRisk*C_USRiskPremiumHigh);
   
-  V_CostOfCapitalLow = (V_CostOfEquityLow*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
-  V_CostOfCapitalHigh = (V_CostOfEquityHigh*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate));
+  V_CostOfCapitalLow = (V_CostOfEquityLow*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate))
+  V_CostOfCapitalHigh = (V_CostOfEquityHigh*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate))
 
   %%%%%%%%%%%%%Growth Estimations%%%%%%%%%%%%%%
 
@@ -158,6 +158,48 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   V_TerminalCashFlowSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
   V_TerminalCashFlowSeries = V_TerminalRevenueSeries - V_TerminalVariableCostSeries - I_FixedCost;
   
+  %%%%%%%%%%%%%DCF%%%%%%%%%%%%%%  
+  
+  FutureTimeLine = 0:P_PlotPeriod;
+  V_FutureCashFlowSeries = cat(2, V_GrowthCashFlowSeries(1:end-1),
+                            V_WindDownCashFlowSeries(1:end-1),
+                            V_TerminalCashFlowSeries);
+
+  V_DiscountedCashFlowSeriesLow = zeros(1, P_PlotPeriod+1);
+  V_DiscountedCashFlowSeriesHigh = zeros(1, P_PlotPeriod+1);
+
+  for n = 1:(P_PlotPeriod+1)
+    V_DiscountedCashFlowSeriesLow(n) = V_FutureCashFlowSeries(n) / ((1+V_CostOfCapitalHigh)^(n-1));
+    V_DiscountedCashFlowSeriesHigh(n) = V_FutureCashFlowSeries(n) / ((1+V_CostOfCapitalLow)^(n-1));
+  end
+
+  V_DCFSummationLow = sum(V_DiscountedCashFlowSeriesLow)
+  V_DCFSummationHigh = sum(V_DiscountedCashFlowSeriesHigh) 
+
+  %%%%%%%%%%%%%Valuation%%%%%%%%%%%%%%  
+
+  if(V_DCFSummationLow > I_ValueofAssets)
+    V_ValuationLow = V_DCFSummationLow
+  else
+    V_ValuationLow = I_ValueofAssets
+  endif
+  
+  if(V_DCFSummationHigh > I_ValueofAssets)
+    V_ValuationHigh = V_DCFSummationHigh
+  else
+    V_ValuationHigh = I_ValueofAssets
+  endif
+      
+  O_EnterpriseValueLow = V_ValuationLow - I_ValueofDebt + I_ValueofCash
+  O_EnterpriseValueHigh = V_ValuationHigh - I_ValueofDebt + I_ValueofCash
+
+      
+  %%%%%%%%%%%%%Metrics%%%%%%%%%%%%%%  
+  
+%  if(V_FutureCashFlowSeries(1)>0)
+%   O_PricetoCashFlowLow = O_CompanyValuationLow/V_FutureCashFlowSeries(1)
+%    O_PricetoCashFlowHigh = O_CompanyValuationHigh/V_FutureCashFlowSeries(1)
+%  endif
   %%%%%%%%%%%%%Plotting%%%%%%%%%%%%%%  
 
   figure(1);  
@@ -194,5 +236,14 @@ function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity,
   grid;
   legend ("location", "northwest");
 
+  figure(3);  
+  plot(FutureTimeLine, V_FutureCashFlowSeries , ";Future Cash Flow;", "marker", '+', "linewidth", 5,
+  FutureTimeLine, V_DiscountedCashFlowSeriesLow , ";Discounted Cash Flow Low Bound;", "marker", '+', "linewidth", 5,
+  FutureTimeLine, V_DiscountedCashFlowSeriesHigh , ";Discounted Cash Flow High Bound;", "marker", '+', "linewidth", 5
+  );
+  xlabel ("Years");
+  ylabel ("Egp");
+  grid;
+  legend ("location", "northwest");
   
 endfunction
