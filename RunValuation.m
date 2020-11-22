@@ -1,5 +1,5 @@
 
-function Valuation = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
+function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
   I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
   I_FixedCost,
   I_TTMVariableCost, I_T_1YearVariableCost, I_T_2YearVariableCost
