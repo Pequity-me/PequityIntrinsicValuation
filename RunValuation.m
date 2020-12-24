@@ -1,5 +1,5 @@
 
-function [O_EnterpriseValueLow, O_EnterpriseValueHigh, O_FiguresPath] = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
+function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
   I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
   I_FixedCost,
   I_TTMVariableCost, I_T_1YearVariableCost, I_T_2YearVariableCost
@@ -201,10 +201,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, O_FiguresPath] = RunValua
 %    O_PricetoCashFlowHigh = O_CompanyValuationHigh/V_FutureCashFlowSeries(1)
 %  endif
   %%%%%%%%%%%%%Plotting%%%%%%%%%%%%%%  
-  
-  O_FiguresPath = strcat("./",strftime ("%Y-%m-%d-%H:%M:%S", localtime (time ())), "/")
-  mkdir(O_FiguresPath)
-  f1 = figure(1);  
+
+  figure(1);  
   plot(PastTimeLine, V_PastRevenueSeries, ";Past Revenue;", "marker", '+', "linewidth", 5, 
   PastTimeLine, V_PastVariableCostSeries, ";Past Variable Cost;", "marker", '+', "linewidth", 5, 
   PastTimeLine, V_PastCashFlowSeries, ";Past Cash Flow;", "marker", '+', "linewidth", 5, 
@@ -222,10 +220,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, O_FiguresPath] = RunValua
   ylabel ("Egp");
   grid;
   legend ("location", "northwest");
-  V_FigName = strcat(num2str(time()),".jpg")
-  print (f1, strcat(O_FiguresPath,V_FigName) ,"-djpeg")
   
-  f2 = figure(2);  
+  figure(2);  
   plot(  PastTimeLine, V_PastRevenueGrowthRateSeries * 100, ";Past Revenue Growth Rate;", "marker", '+', "linewidth", 5,
   PastTimeLine, V_PastVariableCostGrowthRateSeries * 100, ";Past Variable Cost Growth Rate;", "marker", '+', "linewidth", 5,
   GrowthPeriodTimeLine, V_GrowthPeriodRevenueGrowthRateSeries * 100, ";Projected Growth Period Revenue Growth Rate;", "marker", '+', "linewidth", 5, "linestyle", ":",
@@ -239,10 +235,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, O_FiguresPath] = RunValua
   ylabel ("%");
   grid;
   legend ("location", "northwest");
-  V_FigName = strcat(num2str(time()),".jpg")
-  print (f1, strcat(O_FiguresPath,V_FigName) ,"-djpeg")
-  
-  f3 = figure(3);  
+
+  figure(3);  
   plot(FutureTimeLine, V_FutureCashFlowSeries , ";Future Cash Flow;", "marker", '+', "linewidth", 5,
   FutureTimeLine, V_DiscountedCashFlowSeriesLow , ";Discounted Cash Flow Low Bound;", "marker", '+', "linewidth", 5,
   FutureTimeLine, V_DiscountedCashFlowSeriesHigh , ";Discounted Cash Flow High Bound;", "marker", '+', "linewidth", 5
@@ -251,7 +245,5 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, O_FiguresPath] = RunValua
   ylabel ("Egp");
   grid;
   legend ("location", "northwest");
-  V_FigName = strcat(num2str(time()),".jpg")
-  print (f1, strcat(O_FiguresPath,V_FigName) ,"-djpeg")
   
 endfunction
