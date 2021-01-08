@@ -1,19 +1,28 @@
 
-function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industry, I_ValueofDebt, I_ValueofEquity, I_ValueofAssets, I_ValueofCash,
-  I_TTMRevenue, I_T_1YearRevenue, I_T_2YearRevenue,
-  I_FixedCost,
-  I_TTMVariableCost, I_T_1YearVariableCost, I_T_2YearVariableCost
+function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
+          O_ProjectedRevenueSeries, O_ProjectedVariableCostSeries, O_ProjectedCashFlowSeries,...
+          O_PlotPeriod, O_ErrorCode]...
+  = RunValuation (I_Country, I_Industry, I_Debt, I_NonCashAssets, I_Cash,
+  I_YearlyFixedCost,
+  varargin
   )
   
+  %Assumption 1:
   %Revenue = Cost + Income
   %Revenue = FixedCost + VariableCost + CashFlow + IncomeDelta(Assume = 0)
   %CashFlow = Revenue - FixedCost - VariableCost
+
+  %Assumption 2:
+  %Assets = Liabilities + Equity
+  %Assume Liabilities = Debt (Valid assumption for most businesses)  
+  %Equity = Assets(Inclusing Cash) - Debt
   
   %%%%%%%%%%%%%Load parameters%%%%%%%%%%%%%%
   ModelConstants;
-  ModelParameters;
+  LoadCountryModelParameters;
   SimulationParameters;
-  
+  ErrorCode;
+  O_ErrorCode = NoError;
   %%%%%%%%%%%%%Cost of Capital calculations%%%%%%%%%%%%%%
   V_CountryDeafultSpread = P_10YearCountryGvmtBondYieldUSD - P_10YearUSGvmtBondYield;
   V_RiskFreeRate = P_10YearCountryGvmtBondYield - V_CountryDeafultSpread;
@@ -21,54 +30,84 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
   V_CountryRiskPremiumLow = C_USRiskPremiumLow + V_CountryDeafultSpread;
   V_CountryRiskPremiumHigh =  C_USRiskPremiumHigh + V_CountryDeafultSpread;
 
-  V_LeveredIndustryBeta = IndustryBeta(I_Industry);
+  V_LeveredIndustryBeta = ReducedListIndustryBeta(I_Industry);
 
-  V_DebtToEquityRatio = I_ValueofDebt/I_ValueofEquity;
+  V_ValueofEquity = I_NonCashAssets + I_Cash - I_Debt;
+  if(V_ValueofEquity<=0)
+   O_ErrorCode = NegativeEquity;
+  endif
+
+  V_DebtToEquityRatio = I_Debt/V_ValueofEquity;
     
   V_CompanyRelativeRisk = V_LeveredIndustryBeta*(1+((1-P_CountryCorporateTaxRate)*V_DebtToEquityRatio));
   
   V_CostOfEquityLow = V_RiskFreeRate+V_CountryRiskPremiumLow+(V_CompanyRelativeRisk*C_USRiskPremiumLow);
   V_CostOfEquityHigh = V_RiskFreeRate+V_CountryRiskPremiumHigh+(V_CompanyRelativeRisk*C_USRiskPremiumHigh);
   
-  V_CostOfCapitalLow = (V_CostOfEquityLow*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate))
-  V_CostOfCapitalHigh = (V_CostOfEquityHigh*(I_ValueofEquity/(I_ValueofEquity+I_ValueofDebt))) + (P_CostOfDebt*(I_ValueofDebt/(I_ValueofDebt+I_ValueofEquity))*(1-P_CountryCorporateTaxRate))
+  V_CostOfCapitalLow = (V_CostOfEquityLow*(V_ValueofEquity/(V_ValueofEquity+I_Debt))) + (P_CostOfDebt*(I_Debt/(I_Debt+V_ValueofEquity))*(1-P_CountryCorporateTaxRate));
+  V_CostOfCapitalHigh = (V_CostOfEquityHigh*(V_ValueofEquity/(V_ValueofEquity+I_Debt))) + (P_CostOfDebt*(I_Debt/(I_Debt+V_ValueofEquity))*(1-P_CountryCorporateTaxRate));
 
+  if(P_Production == false)
+    V_CostOfCapitalLow
+    V_CostOfCapitalHigh
+  endif
   %%%%%%%%%%%%%Growth Estimations%%%%%%%%%%%%%%
+  %I_YearlyFinancialEntries contains Revenue and VariableCost components
+  FixedArgsCount = 6;
+  V_PastYearsRecoreded = (nargin-FixedArgsCount)/2;
+  V_PastRevenueSeries = zeros(1, V_PastYearsRecoreded);
+  V_PastVariableCostSeries = zeros(1, V_PastYearsRecoreded);
+  V_EstimatedRevenueGrowthRateSeries = zeros(1, V_PastYearsRecoreded-1);
+  V_EstimatedVariableCostGrowthRateSeries = zeros(1, V_PastYearsRecoreded-1);
 
-  V_EstimatedRevenueGrowthRate = sqrt((I_TTMRevenue/I_T_1YearRevenue)*(I_T_1YearRevenue/I_T_2YearRevenue)) - 1
-  V_EstimatedVariableCostGrowthRate = sqrt((I_TTMVariableCost/I_T_1YearVariableCost)*(I_T_1YearVariableCost/I_T_2YearVariableCost)) - 1
+  %Reverse order to be in direction of time  
+  for n = 1:V_PastYearsRecoreded
+    V_PastRevenueSeries(V_PastYearsRecoreded-n+1) = varargin{(2*n)-1};
+    V_PastVariableCostSeries(V_PastYearsRecoreded-n+1) = varargin{2*n};
+  end
+  
+  %Get instantenous yearly growth rates
+  for n = 1:(V_PastYearsRecoreded-1)
+    V_EstimatedRevenueGrowthRateSeries(n) = (V_PastRevenueSeries(n+1)/V_PastRevenueSeries(n))-1;
+    V_EstimatedVariableCostGrowthRateSeries(n) = (V_PastVariableCostSeries(n+1)/V_PastVariableCostSeries(n))-1;
+  end
 
+  %Weight a year's rate propotional to how far in the past it is.
+  for n = 1:(V_PastYearsRecoreded-1)
+    V_EstimatedRevenueGrowthRateSeries(n) = V_EstimatedRevenueGrowthRateSeries(n) * n / (V_PastYearsRecoreded-1);
+    V_EstimatedVariableCostGrowthRateSeries(n) = V_EstimatedVariableCostGrowthRateSeries(n) * n / (V_PastYearsRecoreded-1);
+  end
+
+  V_EstimatedRevenueGrowthRateSeries = V_EstimatedRevenueGrowthRateSeries +1;
+  V_EstimatedVariableCostGrowthRateSeries = V_EstimatedVariableCostGrowthRateSeries +1;
+  
+  V_EstimatedRevenueGrowthRate = sqrt(prod(V_EstimatedRevenueGrowthRateSeries))-1;
+  V_EstimatedVariableCostGrowthRate = sqrt(prod(V_EstimatedVariableCostGrowthRateSeries))-1;
+  
+  if(P_Production == false)
+    V_EstimatedRevenueGrowthRate
+    V_EstimatedVariableCostGrowthRate
+  endif
+
+  
   if(V_EstimatedRevenueGrowthRate < P_TerminalGrowthRate)
     P_TerminalGrowthRate = V_EstimatedRevenueGrowthRate + EPSILON;
   endif
   %%%%%%%%%%%%%Past Period%%%%%%%%%%%%%%
-  PastTimeLine = -P_PastYearsRecoreded:0;
+  PastTimeLine = (-V_PastYearsRecoreded+1):0;
   %Revenue%
-
-  V_PastRevenueSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastRevenueSeries(1) = I_T_2YearRevenue;
-  V_PastRevenueSeries(2) = I_T_1YearRevenue;
-  V_PastRevenueSeries(3) = I_TTMRevenue;
-  
-  V_PastRevenueGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
+  V_PastRevenueGrowthRateSeries = zeros(1, V_PastYearsRecoreded);
   V_PastRevenueGrowthRateSeries(:) = V_EstimatedRevenueGrowthRate;
   
-  %VariableCost%
-  V_PastVariableCostSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastVariableCostSeries(1) = I_T_2YearVariableCost;
-  V_PastVariableCostSeries(2) = I_T_1YearVariableCost;
-  V_PastVariableCostSeries(3) = I_TTMVariableCost;
-  
-  V_PastVariableCostGrowthRateSeries = zeros(1, P_PastYearsRecoreded + 1);
+  %VariableCost%  
+  V_PastVariableCostGrowthRateSeries = zeros(1, V_PastYearsRecoreded);
   V_PastVariableCostGrowthRateSeries(:) = V_EstimatedVariableCostGrowthRate;
 
   %CashFlow%
-  V_PastCashFlowSeries = zeros(1, P_PastYearsRecoreded + 1);
-  V_PastCashFlowSeries = V_PastRevenueSeries - V_PastVariableCostSeries - I_FixedCost;
+  V_PastCashFlowSeries = zeros(1, V_PastYearsRecoreded);
+  V_PastCashFlowSeries = V_PastRevenueSeries - V_PastVariableCostSeries - I_YearlyFixedCost;
   
   %%%%%%%%%%%%%Growth Period%%%%%%%%%%%%%%  
-  
-  
   GrowthPeriodTimeLine = 0:P_NumOfGrowthYears;
 
   %Revenue%
@@ -96,7 +135,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
 
   %CashFlow%
   V_GrowthCashFlowSeries = zeros(1, P_NumOfGrowthYears + 1);
-  V_GrowthCashFlowSeries = V_GrowthRevenueSeries - V_GrowthVariableCostSeries - I_FixedCost;
+  V_GrowthCashFlowSeries = V_GrowthRevenueSeries - V_GrowthVariableCostSeries - I_YearlyFixedCost;
 
   %%%%%%%%%%%%%WindDown Period%%%%%%%%%%%%%%  
   WindDownPeriodTimeLine = P_NumOfGrowthYears:P_NumOfGrowthYears + P_NumOfWindDownYears;
@@ -127,16 +166,16 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
 
   %CashFlow%
   V_WindDownCashFlowSeries = zeros(1, P_NumOfWindDownYears + 1);
-  V_WindDownCashFlowSeries = V_WindDownRevenueSeries - V_WindDownVariableCostSeries - I_FixedCost;
+  V_WindDownCashFlowSeries = V_WindDownRevenueSeries - V_WindDownVariableCostSeries - I_YearlyFixedCost;
 
   %%%%%%%%%%%%%Terminal Period%%%%%%%%%%%%%%  
-  TerminalPeriodTimeLine = P_NumOfWindDownYears+P_NumOfGrowthYears:P_PlotPeriod;
+  TerminalPeriodTimeLine = P_NumOfWindDownYears+P_NumOfGrowthYears:P_FuturePlotPeriod;
 
   %Revenue%
-  V_TerminalRevenueSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalRevenueSeries = zeros(1, P_FuturePlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
   V_TerminalRevenueSeries(1) = V_WindDownRevenueSeries(end);
 
-  V_TerminalPeriodRevenueGrowthRateSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalPeriodRevenueGrowthRateSeries = zeros(1, P_FuturePlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
   V_TerminalPeriodRevenueGrowthRateSeries(:) = P_TerminalGrowthRate ;
 
   for n = 2:length(V_TerminalRevenueSeries)
@@ -144,10 +183,10 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
   end
 
   %VariableCost%
-  V_TerminalVariableCostSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalVariableCostSeries = zeros(1, P_FuturePlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
   V_TerminalVariableCostSeries(1) = V_WindDownVariableCostSeries(end);
 
-  V_TerminalPeriodVariableCostGrowthRateSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalPeriodVariableCostGrowthRateSeries = zeros(1, P_FuturePlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
   V_TerminalPeriodVariableCostGrowthRateSeries(:) = P_TerminalGrowthRate ;
 
   for n = 2:length(V_TerminalVariableCostSeries)
@@ -155,45 +194,76 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
   end
 
   %CashFlow%
-  V_TerminalCashFlowSeries = zeros(1, P_PlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
-  V_TerminalCashFlowSeries = V_TerminalRevenueSeries - V_TerminalVariableCostSeries - I_FixedCost;
+  V_TerminalCashFlowSeries = zeros(1, P_FuturePlotPeriod - P_NumOfGrowthYears - P_NumOfWindDownYears + 1);
+  V_TerminalCashFlowSeries = V_TerminalRevenueSeries - V_TerminalVariableCostSeries - I_YearlyFixedCost;
   
   %%%%%%%%%%%%%DCF%%%%%%%%%%%%%%  
   
-  FutureTimeLine = 0:P_PlotPeriod;
+  FutureTimeLine = 0:P_FuturePlotPeriod;
   V_FutureCashFlowSeries = cat(2, V_GrowthCashFlowSeries(1:end-1),
                             V_WindDownCashFlowSeries(1:end-1),
                             V_TerminalCashFlowSeries);
 
-  V_DiscountedCashFlowSeriesLow = zeros(1, P_PlotPeriod+1);
-  V_DiscountedCashFlowSeriesHigh = zeros(1, P_PlotPeriod+1);
+  V_DiscountedCashFlowSeriesLow = zeros(1, P_FuturePlotPeriod+1);
+  V_DiscountedCashFlowSeriesHigh = zeros(1, P_FuturePlotPeriod+1);
 
-  for n = 1:(P_PlotPeriod+1)
+  for n = 1:(P_FuturePlotPeriod+1)
     V_DiscountedCashFlowSeriesLow(n) = V_FutureCashFlowSeries(n) / ((1+V_CostOfCapitalHigh)^(n-1));
     V_DiscountedCashFlowSeriesHigh(n) = V_FutureCashFlowSeries(n) / ((1+V_CostOfCapitalLow)^(n-1));
   end
 
-  V_DCFSummationLow = sum(V_DiscountedCashFlowSeriesLow)
-  V_DCFSummationHigh = sum(V_DiscountedCashFlowSeriesHigh) 
+  V_DCFSummationLow = sum(V_DiscountedCashFlowSeriesLow);
+  V_DCFSummationHigh = sum(V_DiscountedCashFlowSeriesHigh);
 
-  %%%%%%%%%%%%%Valuation%%%%%%%%%%%%%%  
-
-  if(V_DCFSummationLow > I_ValueofAssets)
-    V_ValuationLow = V_DCFSummationLow
-  else
-    V_ValuationLow = I_ValueofAssets
+  if(P_Production == false)
+    V_DCFSummationLow
+    V_DCFSummationHigh
   endif
   
-  if(V_DCFSummationHigh > I_ValueofAssets)
-    V_ValuationHigh = V_DCFSummationHigh
-  else
-    V_ValuationHigh = I_ValueofAssets
-  endif
-      
-  O_EnterpriseValueLow = V_ValuationLow - I_ValueofDebt + I_ValueofCash
-  O_EnterpriseValueHigh = V_ValuationHigh - I_ValueofDebt + I_ValueofCash
+  %%%%%%%%%%%%%Valuation%%%%%%%%%%%%%%  
 
+  if(V_DCFSummationLow > I_NonCashAssets)
+    V_ValuationLow = V_DCFSummationLow;
+  else
+    V_ValuationLow = I_NonCashAssets;
+   O_ErrorCode = ValueLimitedToAssets;
+  endif
+  
+  if(V_DCFSummationHigh > I_NonCashAssets)
+    V_ValuationHigh = V_DCFSummationHigh;
+  else
+    V_ValuationHigh = I_NonCashAssets;
+  endif
+
+  %%%%%%%%%%%%%Formulate Outputs%%%%%%%%%%%%%%  
       
+  O_EnterpriseValueLow = V_ValuationLow - I_Debt + I_Cash;
+  O_EnterpriseValueHigh = V_ValuationHigh - I_Debt + I_Cash;
+  
+  O_ProjectedRevenueSeries = cat(2, V_PastRevenueSeries(1:end-1),
+                            V_GrowthRevenueSeries(1:end-1),
+                            V_WindDownRevenueSeries(1:end-1),
+                            V_TerminalRevenueSeries);
+
+  O_ProjectedVariableCostSeries = cat(2, V_PastVariableCostSeries(1:end-1),
+                            V_GrowthVariableCostSeries(1:end-1),
+                            V_WindDownVariableCostSeries(1:end-1),
+                            V_TerminalVariableCostSeries);
+
+  O_ProjectedCashFlowSeries = cat(2, V_PastCashFlowSeries(1:end-1),
+                            V_GrowthCashFlowSeries(1:end-1),
+                            V_WindDownCashFlowSeries(1:end-1),
+                            V_TerminalCashFlowSeries);
+  
+  O_PlotPeriod = length(O_ProjectedRevenueSeries);
+  
+  O_ErrorCode;
+
+  if(P_Production == false)
+    O_EnterpriseValueLow
+    O_EnterpriseValueHigh
+  endif
+  
   %%%%%%%%%%%%%Metrics%%%%%%%%%%%%%%  
   
 %  if(V_FutureCashFlowSeries(1)>0)
@@ -201,6 +271,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
 %    O_PricetoCashFlowHigh = O_CompanyValuationHigh/V_FutureCashFlowSeries(1)
 %  endif
   %%%%%%%%%%%%%Plotting%%%%%%%%%%%%%%  
+if(P_Production == false)
 
   figure(1);  
   plot(PastTimeLine, V_PastRevenueSeries, ";Past Revenue;", "marker", '+', "linewidth", 5, 
@@ -245,5 +316,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh] = RunValuation (I_Industr
   ylabel ("Egp");
   grid;
   legend ("location", "northwest");
+
+ 
+ endif
   
 endfunction

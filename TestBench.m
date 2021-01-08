@@ -1,9 +1,17 @@
-%RunValuation ("Advertising", 200000, 1000000, 200000, 50000,
-%  150000, 120000, 100000,
-%  100000,
-%  50000, 40000, 30000)
+%Function Format
+%[O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
+%          O_ProjectedRevenueSeries, O_ProjectedVariableCostSeries, O_ProjectedCashFlowSeries,...
+%          O_PlotPeriod, O_ErrorCode]... 
+%= RunValuation (I_Country, I_Industry, I_Debt, I_NonCashAssets, I_Cash,
+%  I_YearlyFixedCost,
+%  I_YearlyFinancialEntries[0].Revenue, I_YearlyFinancialEntries[0].CashFlow, 
+%  I_YearlyFinancialEntries[1].Revenue, I_YearlyFinancialEntries[1].CashFlow, 
+%  ...);
+
+[O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
+          O_ProjectedRevenueSeries, O_ProjectedVariableCostSeries, O_ProjectedCashFlowSeries,...
+          O_PlotPeriod, O_ErrorCode]... 
+= RunValuation ("Egypt", "Advertising", 200000, 100000, 200000,
+  100000,
+  150000, 35000, 120000, 30000, 100000, 20000, 70000, 15000, 50000, 12000)
   
-[Low,High] = RunValuation ("Advertising", 300000, 1000000, 200000, 50000,
-  100000, 120000, 150000,
-  50000,
-  30000, 40000, 50000)
