@@ -4,9 +4,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
           O_PlotPeriod, O_ErrorCode]...
   = RunValuation (I_Country, I_Industry, I_Debt, I_NonCashAssets, I_Cash,
   I_YearlyFixedCost,
-  varargin
+  I_YearlyFinancialEntries
   )
-  
   %Assumption 1:
   %Revenue = Cost + Income
   %Revenue = FixedCost + VariableCost + CashFlow + IncomeDelta(Assume = 0)
@@ -53,8 +52,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   endif
   %%%%%%%%%%%%%Growth Estimations%%%%%%%%%%%%%%
   %I_YearlyFinancialEntries contains Revenue and VariableCost components
-  FixedArgsCount = 6;
-  V_PastYearsRecoreded = (nargin-FixedArgsCount)/2;
+  V_PastYearsRecoreded = length(I_YearlyFinancialEntries)/2;
   V_PastRevenueSeries = zeros(1, V_PastYearsRecoreded);
   V_PastVariableCostSeries = zeros(1, V_PastYearsRecoreded);
   V_EstimatedRevenueGrowthRateSeries = zeros(1, V_PastYearsRecoreded-1);
@@ -62,8 +60,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
 
   %Reverse order to be in direction of time  
   for n = 1:V_PastYearsRecoreded
-    V_PastRevenueSeries(V_PastYearsRecoreded-n+1) = varargin{(2*n)-1};
-    V_PastVariableCostSeries(V_PastYearsRecoreded-n+1) = varargin{2*n};
+    V_PastRevenueSeries(V_PastYearsRecoreded-n+1) = I_YearlyFinancialEntries((2*n)-1);
+    V_PastVariableCostSeries(V_PastYearsRecoreded-n+1) = I_YearlyFinancialEntries(2*n);
   end
   
   %Get instantenous yearly growth rates
