@@ -1,2 +1,2 @@
 P_FuturePlotPeriod = 30;
-P_Production = true;
+P_Production = false;

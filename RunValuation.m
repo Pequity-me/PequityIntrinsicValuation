@@ -6,6 +6,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   I_YearlyFixedCost,
   I_YearlyFinancialEntries
   )
+  
   %Assumption 1:
   %Revenue = Cost + Income
   %Revenue = FixedCost + VariableCost + CashFlow + IncomeDelta(Assume = 0)
@@ -29,7 +30,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   V_CountryRiskPremiumLow = C_USRiskPremiumLow + V_CountryDeafultSpread;
   V_CountryRiskPremiumHigh =  C_USRiskPremiumHigh + V_CountryDeafultSpread;
 
-  V_LeveredIndustryBeta = ReducedListIndustryBeta(I_Industry);
+  V_UnLeveredIndustryBeta = ReducedListIndustryBeta(I_Industry);
 
   V_ValueofEquity = I_NonCashAssets + I_Cash - I_Debt;
   if(V_ValueofEquity<=0)
@@ -38,7 +39,7 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
 
   V_DebtToEquityRatio = I_Debt/V_ValueofEquity;
     
-  V_CompanyRelativeRisk = V_LeveredIndustryBeta*(1+((1-P_CountryCorporateTaxRate)*V_DebtToEquityRatio));
+  V_CompanyRelativeRisk = V_UnLeveredIndustryBeta*(1+((1-P_CountryCorporateTaxRate)*V_DebtToEquityRatio));
   
   V_CostOfEquityLow = V_RiskFreeRate+V_CountryRiskPremiumLow+(V_CompanyRelativeRisk*C_USRiskPremiumLow);
   V_CostOfEquityHigh = V_RiskFreeRate+V_CountryRiskPremiumHigh+(V_CompanyRelativeRisk*C_USRiskPremiumHigh);
@@ -79,8 +80,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   V_EstimatedRevenueGrowthRateSeries = V_EstimatedRevenueGrowthRateSeries +1;
   V_EstimatedVariableCostGrowthRateSeries = V_EstimatedVariableCostGrowthRateSeries +1;
   
-  V_EstimatedRevenueGrowthRate = sqrt(prod(V_EstimatedRevenueGrowthRateSeries))-1;
-  V_EstimatedVariableCostGrowthRate = sqrt(prod(V_EstimatedVariableCostGrowthRateSeries))-1;
+  V_EstimatedRevenueGrowthRate = (prod(V_EstimatedRevenueGrowthRateSeries).^(1/(V_PastYearsRecoreded-1))) -1;
+  V_EstimatedVariableCostGrowthRate = (prod(V_EstimatedVariableCostGrowthRateSeries).^(1/(V_PastYearsRecoreded-1))) -1;
   
   if(P_Production == false)
     V_EstimatedRevenueGrowthRate
@@ -143,8 +144,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   V_WindDownRevenueSeries(1) = V_GrowthRevenueSeries(end);  
 
   V_WindDownPeriodRevenueGrowthRateSeries = zeros(1, P_NumOfWindDownYears + 1);
-  YearlyDropInGrowth = (V_EstimatedRevenueGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
-  V_WindDownPeriodRevenueGrowthRateSeries(:) =  V_EstimatedRevenueGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate;
+  RevenueYearlyDropInGrowth = (V_EstimatedRevenueGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
+  V_WindDownPeriodRevenueGrowthRateSeries(:) =  V_EstimatedRevenueGrowthRate: - RevenueYearlyDropInGrowth: P_TerminalGrowthRate;
   
   for n = 2:length(V_GrowthRevenueSeries)
     V_WindDownRevenueSeries(n) =(V_WindDownRevenueSeries(n-1)*(1+V_WindDownPeriodRevenueGrowthRateSeries(n)));
@@ -155,8 +156,8 @@ function [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
   V_WindDownVariableCostSeries(1) = V_GrowthVariableCostSeries(end);  
 
   V_WindDownPeriodVariableCostGrowthRateSeries = zeros(1, P_NumOfWindDownYears + 1);
-  YearlyDropInGrowth = (V_EstimatedVariableCostGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
-  V_WindDownPeriodVariableCostGrowthRateSeries(:) =  V_EstimatedVariableCostGrowthRate: - YearlyDropInGrowth: P_TerminalGrowthRate;
+  VariableCostYearlyDropInGrowth = (V_EstimatedVariableCostGrowthRate - P_TerminalGrowthRate)/P_NumOfWindDownYears;
+  V_WindDownPeriodVariableCostGrowthRateSeries(:) =  V_EstimatedVariableCostGrowthRate: - VariableCostYearlyDropInGrowth: P_TerminalGrowthRate;
   
   for n = 2:length(V_GrowthVariableCostSeries)
     V_WindDownVariableCostSeries(n) =(V_WindDownVariableCostSeries(n-1)*(1+V_WindDownPeriodVariableCostGrowthRateSeries(n)));

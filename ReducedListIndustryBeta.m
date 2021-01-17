@@ -1,163 +1,143 @@
-function TotalLeveredBeta = ReducedListIndustryBeta (Industry)
+function UnLeveredBeta = ReducedListIndustryBeta (Industry)
   
   if(Industry == "Advertising")
-     TotalLeveredBeta = 8.22;
+     UnLeveredBeta = 0.83;
   elseif(Industry == "Apparel")
-     TotalLeveredBeta = 4.67;
+     UnLeveredBeta = 0.83;
   elseif(Industry == "Auto & Truck")
-     TotalLeveredBeta = 3.63;
+     UnLeveredBeta = 0.56;
   elseif(Industry == "Auto Parts")
-     TotalLeveredBeta = 4.66;
-  elseif(Industry == "Bank (Money Center)")
-     TotalLeveredBeta = 1.78;
+     UnLeveredBeta = 0.99;
   elseif(Industry == "Banks (Regional)")
-     TotalLeveredBeta = 1.85;
-  elseif(Industry == "Beverage (Soft)")
-     TotalLeveredBeta = 6.43;
+     UnLeveredBeta = 0.42;
+  elseif(Industry == "Beverage")
+     UnLeveredBeta = 0.87;
   elseif(Industry == "Broadcasting")
-     TotalLeveredBeta = 4.08;
+     UnLeveredBeta = 0.67;
   elseif(Industry == "Brokerage & Investment Banking")
-     TotalLeveredBeta = 3.51;
+     UnLeveredBeta = 0.5;
   elseif(Industry == "Building Materials")
-     TotalLeveredBeta = 3.17;
+     UnLeveredBeta = 0.96;
   elseif(Industry == "Business & Consumer Services")
-     TotalLeveredBeta = 4.48;
-  elseif(Industry == "Cable TV")
-     TotalLeveredBeta = 2.19;
-  elseif(Industry == "Chemical (Basic)")
-     TotalLeveredBeta = 5.69;
+     UnLeveredBeta = 0.92;
+  elseif(Industry == "Chemical")
+     UnLeveredBeta = 0.89;
   elseif(Industry == "Coal & Related Energy")
-     TotalLeveredBeta = 6.74;
+     UnLeveredBeta = 0.77;
   elseif(Industry == "Computer Services")
-     TotalLeveredBeta = 5.05;
+     UnLeveredBeta = 0.95;
   elseif(Industry == "Computers/Peripherals")
-     TotalLeveredBeta = 5.96;
+     UnLeveredBeta = 1.23;
   elseif(Industry == "Construction Supplies")
-     TotalLeveredBeta = 3.56;
-  elseif(Industry == "Drugs (Biotechnology)")
-     TotalLeveredBeta = 6.22;
+     UnLeveredBeta = 1.05;
   elseif(Industry == "Drugs (Pharmaceutical)")
-     TotalLeveredBeta = 7.38;
+     UnLeveredBeta = 1.08;
   elseif(Industry == "Education")
-     TotalLeveredBeta = 8.1;
+     UnLeveredBeta = 1.07;
   elseif(Industry == "Electrical Equipment")
-     TotalLeveredBeta = 6.4;
-  elseif(Industry == "Electronics (Consumer & Office)")
-     TotalLeveredBeta = 7.05;
-  elseif(Industry == "Electronics (General)")
-     TotalLeveredBeta = 4.6;
+     UnLeveredBeta = 1.1;
+  elseif(Industry == "Electronics")
+     UnLeveredBeta = 0.93;
   elseif(Industry == "Engineering/Construction")
-     TotalLeveredBeta = 5.02;
+     UnLeveredBeta = 1.05;
   elseif(Industry == "Entertainment")
-     TotalLeveredBeta = 7.86;
+     UnLeveredBeta = 1.03;
   elseif(Industry == "Environmental & Waste Services")
-     TotalLeveredBeta = 6.2;
+     UnLeveredBeta = 0.83;
   elseif(Industry == "Farming/Agriculture")
-     TotalLeveredBeta = 3.56;
+     UnLeveredBeta = 0.63;
   elseif(Industry == "Financial Svcs. (Non-bank & Insurance")
-     TotalLeveredBeta = 2.7;
+     UnLeveredBeta = 0.08;
   elseif(Industry == "Food Processing")
-     TotalLeveredBeta = 4.53;
+     UnLeveredBeta = 0.63;
   elseif(Industry == "Food Wholesalers")
-     TotalLeveredBeta = 3.55;
+     UnLeveredBeta = 0.94;
   elseif(Industry == "Furn/Home Furnishings")
-     TotalLeveredBeta = 5.06;
+     UnLeveredBeta = 0.77;
   elseif(Industry == "Green & Renewable Energy")
-     TotalLeveredBeta = 8.24;
+     UnLeveredBeta = 0.68;
   elseif(Industry == "Healthcare Products")
-     TotalLeveredBeta = 4.36;
+     UnLeveredBeta = 0.92;
   elseif(Industry == "Healthcare Support Services")
-     TotalLeveredBeta = 4.84;
-  elseif(Industry == "Heathcare Information and Technology")
-     TotalLeveredBeta = 4.98;
+     UnLeveredBeta = 0.87;
   elseif(Industry == "Homebuilding")
-     TotalLeveredBeta = 3.34;
+     UnLeveredBeta = 0.86;
   elseif(Industry == "Hospitals/Healthcare Facilities")
-     TotalLeveredBeta = 4.29;
-  elseif(Industry == "Hotel")
-     TotalLeveredBeta = 3.92;
+     UnLeveredBeta = 0.56;
+  elseif(Industry == "Hotels")
+     UnLeveredBeta = 0.82;
   elseif(Industry == "Household Products")
-     TotalLeveredBeta = 6.24;
+     UnLeveredBeta = 0.85;
   elseif(Industry == "Information Services")
-     TotalLeveredBeta = 3.06;
+     UnLeveredBeta = 0.94;
   elseif(Industry == "Insurance (General)")
-     TotalLeveredBeta = 1.84;
+     UnLeveredBeta = 0.66;
   elseif(Industry == "Investments & Asset Management")
-     TotalLeveredBeta = 3.72;
+     UnLeveredBeta = 0.81;
   elseif(Industry == "Machinery")
-     TotalLeveredBeta = 3.32;
+     UnLeveredBeta = 1.04;
   elseif(Industry == "Metals & Mining")
-     TotalLeveredBeta = 8.64;
+     UnLeveredBeta = 0.96;
   elseif(Industry == "Office Equipment & Services")
-     TotalLeveredBeta = 5.3;
+     UnLeveredBeta = 1.15;
   elseif(Industry == "Oil/Gas Distribution")
-     TotalLeveredBeta = 2.86;
+     UnLeveredBeta = 0.65;
   elseif(Industry == "Packaging & Container")
-     TotalLeveredBeta = 2.38;
-  elseif(Industry == "Paper/Forest Products")
-     TotalLeveredBeta = 4.4;
-  elseif(Industry == "Power")
-     TotalLeveredBeta = 2.19;
+     UnLeveredBeta = 0.69;
+  elseif(Industry == "Paper Products")
+     UnLeveredBeta = 1.01;
   elseif(Industry == "Precious Metals")
-     TotalLeveredBeta = 13.47;
+     UnLeveredBeta = 1.05;
   elseif(Industry == "Publishing & Newspapers")
-     TotalLeveredBeta = 4.29;
+     UnLeveredBeta = 0.94;
   elseif(Industry == "R.E.I.T.")
-     TotalLeveredBeta = 1.8;
+     UnLeveredBeta = 0.48;
   elseif(Industry == "Real Estate (Development)")
-     TotalLeveredBeta = 7.79;
+     UnLeveredBeta = 0.72;
   elseif(Industry == "Real Estate (General/Diversified)")
-     TotalLeveredBeta = 7.15;
+     UnLeveredBeta = 1.07;
   elseif(Industry == "Real Estate (Operations & Services)")
-     TotalLeveredBeta = 4.32;
+     UnLeveredBeta = 0.8;
   elseif(Industry == "Recreation")
-     TotalLeveredBeta = 4.5;
+     UnLeveredBeta = 0.76;
   elseif(Industry == "Restaurant/Dining")
-     TotalLeveredBeta = 4.3;
+     UnLeveredBeta = 0.74;
   elseif(Industry == "Retail (Automotive)")
-     TotalLeveredBeta = 4.6;
+     UnLeveredBeta = 0.77;
   elseif(Industry == "Retail (Building Supply)")
-     TotalLeveredBeta = 4.57;
+     UnLeveredBeta = 1.12;
   elseif(Industry == "Retail (Distributors)")
-     TotalLeveredBeta = 4.2;
+     UnLeveredBeta = 0.85;
   elseif(Industry == "Retail (General)")
-     TotalLeveredBeta = 3.51;
+     UnLeveredBeta = 0.86;
   elseif(Industry == "Retail (Grocery and Food)")
-     TotalLeveredBeta = 3.6;
+     UnLeveredBeta = 0.41;
   elseif(Industry == "Retail (Online)")
-     TotalLeveredBeta = 5.84;
-  elseif(Industry == "Retail (Special Lines)")
-     TotalLeveredBeta = 4.4;
+     UnLeveredBeta = 1.24;
   elseif(Industry == "Rubber& Tires")
-     TotalLeveredBeta = 3.14;
+     UnLeveredBeta = 0.66;
   elseif(Industry == "Semiconductor")
-     TotalLeveredBeta = 3.68;
+     UnLeveredBeta = 1.17;
   elseif(Industry == "Shipbuilding & Marine")
-     TotalLeveredBeta = 7.05;
+     UnLeveredBeta = 0.97;
   elseif(Industry == "Shoe")
-     TotalLeveredBeta = 2.38;
+     UnLeveredBeta = 0.84;
   elseif(Industry == "Software (Entertainment)")
-     TotalLeveredBeta = 6.78;
+     UnLeveredBeta = 1.14;
   elseif(Industry == "Software (Internet)")
-     TotalLeveredBeta = 5.81;
+     UnLeveredBeta = 1.2;
   elseif(Industry == "Software (System & Application)")
-     TotalLeveredBeta = 5.17;
+     UnLeveredBeta = 1.08;
   elseif(Industry == "Steel")
-     TotalLeveredBeta = 4.5;
-  elseif(Industry == "Telecom (Wireless)")
-     TotalLeveredBeta = 4.95;
-  elseif(Industry == "Telecom. Equipment")
-     TotalLeveredBeta = 3.56;
-  elseif(Industry == "Telecom. Services")
-     TotalLeveredBeta = 5.64;
+     UnLeveredBeta = 1.16;
+  elseif(Industry == "Telecom Services")
+     UnLeveredBeta = 0.63;
   elseif(Industry == "Transportation")
-     TotalLeveredBeta = 2.97;
-  elseif(Industry == "Transportation (Railroads)")
-     TotalLeveredBeta = 5.27;
+     UnLeveredBeta = 0.91;
   elseif(Industry == "Trucking")
-     TotalLeveredBeta = 3.76;
+     UnLeveredBeta = 0.88;
   elseif(Industry == "Utility (General)")
-     TotalLeveredBeta = 1.15;
+     UnLeveredBeta = 0.28;
   else
     error("Invliad Industry");
   endif
