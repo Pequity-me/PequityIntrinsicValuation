@@ -24,7 +24,7 @@ elseif(strcmp(I_Country,"China"))
 
 elseif(strcmp(I_Country,"Egypt"))
   P_10YearCountryGvmtBondYield = 0.148;
-  P_10YearCountryGvmtBondYieldUSD = 0.07;
+  P_10YearCountryGvmtBondYieldUSD = 0.0645;
   P_CountryCorporateTaxRate = 0.225;
   P_CostOfDebt = 0.098;
 
