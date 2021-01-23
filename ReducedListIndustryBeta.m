@@ -1,142 +1,142 @@
 function UnLeveredBeta = ReducedListIndustryBeta (Industry)
   
-  if(Industry == "Advertising")
+  if(strcmp(Industry , "Advertising") )
      UnLeveredBeta = 0.83;
-  elseif(Industry == "Apparel")
+  elseif(strcmp(Industry , "Apparel") )
      UnLeveredBeta = 0.83;
-  elseif(Industry == "Auto & Truck")
+  elseif(strcmp(Industry , "Auto & Truck") )
      UnLeveredBeta = 0.56;
-  elseif(Industry == "Auto Parts")
+  elseif(strcmp(Industry , "Auto Parts") )
      UnLeveredBeta = 0.99;
-  elseif(Industry == "Banks (Regional)")
+  elseif(strcmp(Industry , "Banks (Regional)") )
      UnLeveredBeta = 0.42;
-  elseif(Industry == "Beverage")
+  elseif(strcmp(Industry , "Beverage") )
      UnLeveredBeta = 0.87;
-  elseif(Industry == "Broadcasting")
+  elseif(strcmp(Industry , "Broadcasting") )
      UnLeveredBeta = 0.67;
-  elseif(Industry == "Brokerage & Investment Banking")
+  elseif(strcmp(Industry , "Brokerage & Investment Banking") )
      UnLeveredBeta = 0.5;
-  elseif(Industry == "Building Materials")
+  elseif(strcmp(Industry , "Building Materials") )
      UnLeveredBeta = 0.96;
-  elseif(Industry == "Business & Consumer Services")
+  elseif(strcmp(Industry , "Business & Consumer Services") )
      UnLeveredBeta = 0.92;
-  elseif(Industry == "Chemical")
+  elseif(strcmp(Industry , "Chemical") )
      UnLeveredBeta = 0.89;
-  elseif(Industry == "Coal & Related Energy")
+  elseif(strcmp(Industry , "Coal & Related Energy") )
      UnLeveredBeta = 0.77;
-  elseif(Industry == "Computer Services")
+  elseif(strcmp(Industry , "Computer Services") )
      UnLeveredBeta = 0.95;
-  elseif(Industry == "Computers/Peripherals")
+  elseif(strcmp(Industry , "Computers/Peripherals") )
      UnLeveredBeta = 1.23;
-  elseif(Industry == "Construction Supplies")
+  elseif(strcmp(Industry , "Construction Supplies") )
      UnLeveredBeta = 1.05;
-  elseif(Industry == "Drugs (Pharmaceutical)")
+  elseif(strcmp(Industry , "Drugs (Pharmaceutical)") )
      UnLeveredBeta = 1.08;
-  elseif(Industry == "Education")
+  elseif(strcmp(Industry , "Education") )
      UnLeveredBeta = 1.07;
-  elseif(Industry == "Electrical Equipment")
+  elseif(strcmp(Industry , "Electrical Equipment") )
      UnLeveredBeta = 1.1;
-  elseif(Industry == "Electronics")
+  elseif(strcmp(Industry , "Electronics") )
      UnLeveredBeta = 0.93;
-  elseif(Industry == "Engineering/Construction")
+  elseif(strcmp(Industry , "Engineering/Construction") )
      UnLeveredBeta = 1.05;
-  elseif(Industry == "Entertainment")
+  elseif(strcmp(Industry , "Entertainment") )
      UnLeveredBeta = 1.03;
-  elseif(Industry == "Environmental & Waste Services")
+  elseif(strcmp(Industry , "Environmental & Waste Services") )
      UnLeveredBeta = 0.83;
-  elseif(Industry == "Farming/Agriculture")
+  elseif(strcmp(Industry , "Farming/Agriculture") )
      UnLeveredBeta = 0.63;
-  elseif(Industry == "Financial Svcs. (Non-bank & Insurance")
+  elseif(strcmp(Industry , "Financial Svcs. (Non-bank & Insurance") )
      UnLeveredBeta = 0.08;
-  elseif(Industry == "Food Processing")
+  elseif(strcmp(Industry , "Food Processing") )
      UnLeveredBeta = 0.63;
-  elseif(Industry == "Food Wholesalers")
+  elseif(strcmp(Industry , "Food Wholesalers") )
      UnLeveredBeta = 0.94;
-  elseif(Industry == "Furn/Home Furnishings")
+  elseif(strcmp(Industry , "Furn/Home Furnishings") )
      UnLeveredBeta = 0.77;
-  elseif(Industry == "Green & Renewable Energy")
+  elseif(strcmp(Industry , "Green & Renewable Energy") )
      UnLeveredBeta = 0.68;
-  elseif(Industry == "Healthcare Products")
+  elseif(strcmp(Industry , "Healthcare Products") )
      UnLeveredBeta = 0.92;
-  elseif(Industry == "Healthcare Support Services")
+  elseif(strcmp(Industry , "Healthcare Support Services") )
      UnLeveredBeta = 0.87;
-  elseif(Industry == "Homebuilding")
+  elseif(strcmp(Industry , "Homebuilding") )
      UnLeveredBeta = 0.86;
-  elseif(Industry == "Hospitals/Healthcare Facilities")
+  elseif(strcmp(Industry , "Hospitals/Healthcare Facilities") )
      UnLeveredBeta = 0.56;
-  elseif(Industry == "Hotels")
+  elseif(strcmp(Industry , "Hotels") )
      UnLeveredBeta = 0.82;
-  elseif(Industry == "Household Products")
+  elseif(strcmp(Industry , "Household Products") )
      UnLeveredBeta = 0.85;
-  elseif(Industry == "Information Services")
+  elseif(strcmp(Industry , "Information Services") )
      UnLeveredBeta = 0.94;
-  elseif(Industry == "Insurance (General)")
+  elseif(strcmp(Industry , "Insurance (General)") )
      UnLeveredBeta = 0.66;
-  elseif(Industry == "Investments & Asset Management")
+  elseif(strcmp(Industry , "Investments & Asset Management") )
      UnLeveredBeta = 0.81;
-  elseif(Industry == "Machinery")
+  elseif(strcmp(Industry , "Machinery") )
      UnLeveredBeta = 1.04;
-  elseif(Industry == "Metals & Mining")
+  elseif(strcmp(Industry , "Metals & Mining") )
      UnLeveredBeta = 0.96;
-  elseif(Industry == "Office Equipment & Services")
+  elseif(strcmp(Industry , "Office Equipment & Services") )
      UnLeveredBeta = 1.15;
-  elseif(Industry == "Oil/Gas Distribution")
+  elseif(strcmp(Industry , "Oil/Gas Distribution") )
      UnLeveredBeta = 0.65;
-  elseif(Industry == "Packaging & Container")
+  elseif(strcmp(Industry , "Packaging & Container") )
      UnLeveredBeta = 0.69;
-  elseif(Industry == "Paper Products")
+  elseif(strcmp(Industry , "Paper Products") )
      UnLeveredBeta = 1.01;
-  elseif(Industry == "Precious Metals")
+  elseif(strcmp(Industry , "Precious Metals") )
      UnLeveredBeta = 1.05;
-  elseif(Industry == "Publishing & Newspapers")
+  elseif(strcmp(Industry , "Publishing & Newspapers") )
      UnLeveredBeta = 0.94;
-  elseif(Industry == "R.E.I.T.")
+  elseif(strcmp(Industry , "R.E.I.T.") )
      UnLeveredBeta = 0.48;
-  elseif(Industry == "Real Estate (Development)")
+  elseif(strcmp(Industry , "Real Estate (Development)") )
      UnLeveredBeta = 0.72;
-  elseif(Industry == "Real Estate (General/Diversified)")
+  elseif(strcmp(Industry , "Real Estate (General/Diversified)") )
      UnLeveredBeta = 1.07;
-  elseif(Industry == "Real Estate (Operations & Services)")
+  elseif(strcmp(Industry , "Real Estate (Operations & Services)") )
      UnLeveredBeta = 0.8;
-  elseif(Industry == "Recreation")
+  elseif(strcmp(Industry , "Recreation") )
      UnLeveredBeta = 0.76;
-  elseif(Industry == "Restaurant/Dining")
+  elseif(strcmp(Industry , "Restaurant/Dining") )
      UnLeveredBeta = 0.74;
-  elseif(Industry == "Retail (Automotive)")
+  elseif(strcmp(Industry , "Retail (Automotive)") )
      UnLeveredBeta = 0.77;
-  elseif(Industry == "Retail (Building Supply)")
+  elseif(strcmp(Industry , "Retail (Building Supply)") )
      UnLeveredBeta = 1.12;
-  elseif(Industry == "Retail (Distributors)")
+  elseif(strcmp(Industry , "Retail (Distributors)") )
      UnLeveredBeta = 0.85;
-  elseif(Industry == "Retail (General)")
+  elseif(strcmp(Industry , "Retail (General)") )
      UnLeveredBeta = 0.86;
-  elseif(Industry == "Retail (Grocery and Food)")
+  elseif(strcmp(Industry , "Retail (Grocery and Food)") )
      UnLeveredBeta = 0.41;
-  elseif(Industry == "Retail (Online)")
+  elseif(strcmp(Industry , "Retail (Online)") )
      UnLeveredBeta = 1.24;
-  elseif(Industry == "Rubber& Tires")
+  elseif(strcmp(Industry , "Rubber& Tires") )
      UnLeveredBeta = 0.66;
-  elseif(Industry == "Semiconductor")
+  elseif(strcmp(Industry , "Semiconductor") )
      UnLeveredBeta = 1.17;
-  elseif(Industry == "Shipbuilding & Marine")
+  elseif(strcmp(Industry , "Shipbuilding & Marine") )
      UnLeveredBeta = 0.97;
-  elseif(Industry == "Shoe")
+  elseif(strcmp(Industry , "Shoe") )
      UnLeveredBeta = 0.84;
-  elseif(Industry == "Software (Entertainment)")
+  elseif(strcmp(Industry , "Software (Entertainment)") )
      UnLeveredBeta = 1.14;
-  elseif(Industry == "Software (Internet)")
+  elseif(strcmp(Industry , "Software (Internet)") )
      UnLeveredBeta = 1.2;
-  elseif(Industry == "Software (System & Application)")
+  elseif(strcmp(Industry , "Software (System & Application)") )
      UnLeveredBeta = 1.08;
-  elseif(Industry == "Steel")
+  elseif(strcmp(Industry , "Steel") )
      UnLeveredBeta = 1.16;
-  elseif(Industry == "Telecom Services")
+  elseif(strcmp(Industry , "Telecom Services") )
      UnLeveredBeta = 0.63;
-  elseif(Industry == "Transportation")
+  elseif(strcmp(Industry , "Transportation") )
      UnLeveredBeta = 0.91;
-  elseif(Industry == "Trucking")
+  elseif(strcmp(Industry , "Trucking") )
      UnLeveredBeta = 0.88;
-  elseif(Industry == "Utility (General)")
+  elseif(strcmp(Industry , "Utility (General)") )
      UnLeveredBeta = 0.28;
   else
     error("Invliad Industry");
