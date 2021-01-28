@@ -120,10 +120,18 @@
 %  [30000, 8000, 28000, 7000, 27000, 6200, 25000, 5500, 20500, 5000, 20000, 3500, 13000, 2700, 9000, 2500, 6000, 2000, 5000, 1000])
   
 %Test Case 13: Increasing Revenues and Variable Cost (Change industry)
+%[O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
+%          O_ProjectedRevenueSeries, O_ProjectedVariableCostSeries, O_ProjectedCashFlowSeries,...
+%          O_PlotPeriod, O_ErrorCode]... 
+%= RunValuation ("Indonesia", "Real Estate (Operations & Services)", 200000, 100000, 200000,
+%  10000,
+%  [30000, 8000, 28000, 7000, 27000, 6200, 25000, 5500, 20500, 5000, 20000, 3500, 13000, 2700, 9000, 2500, 6000, 2000, 5000, 1000])
+  
+%Test Case 13: Extremely high revenue growth.
 [O_EnterpriseValueLow, O_EnterpriseValueHigh, ...
           O_ProjectedRevenueSeries, O_ProjectedVariableCostSeries, O_ProjectedCashFlowSeries,...
           O_PlotPeriod, O_ErrorCode]... 
 = RunValuation ("Indonesia", "Real Estate (Operations & Services)", 200000, 100000, 200000,
   10000,
-  [30000, 8000, 28000, 7000, 27000, 6200, 25000, 5500, 20500, 5000, 20000, 3500, 13000, 2700, 9000, 2500, 6000, 2000, 5000, 1000])
+  [30000, 8000, 1000, 500])
   
