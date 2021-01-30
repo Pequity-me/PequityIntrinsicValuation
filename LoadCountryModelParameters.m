@@ -34,11 +34,23 @@ elseif(strcmp(I_Country,"India"))
   P_CountryCorporateTaxRate = 0.25;
   P_CostOfDebt = 0.088;
 
+elseif(strcmp(I_Country,"Jordan"))
+  P_10YearCountryGvmtBondYield = 0.04665;
+  P_10YearCountryGvmtBondYieldUSD = 0.0510;
+  P_CountryCorporateTaxRate = 0.2;
+  P_CostOfDebt = 0.083;
+
 elseif(strcmp(I_Country,"Indonesia"))
   P_10YearCountryGvmtBondYield = 0.06212;
   P_10YearCountryGvmtBondYieldUSD = 0.0296;
   P_CountryCorporateTaxRate = 0.15;
   P_CostOfDebt = 0.045;
+
+elseif(strcmp(I_Country,"Malaysia"))
+  P_10YearCountryGvmtBondYield = 0.02708;
+  P_10YearCountryGvmtBondYieldUSD = 0.0218;
+  P_CountryCorporateTaxRate = 0.24;
+  P_CostOfDebt = 0.035;
 
 elseif(strcmp(I_Country,"Nigeria"))
   P_10YearCountryGvmtBondYield = 0.08353;
