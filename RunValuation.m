@@ -248,6 +248,10 @@ try
   O_EnterpriseValueLow = V_ValuationLow - I_Debt + I_Cash;
   O_EnterpriseValueHigh = V_ValuationHigh - I_Debt + I_Cash;
   
+  if((O_EnterpriseValueLow>P_LongMax) || (O_EnterpriseValueHigh>P_LongMax))
+    O_ErrorCode = CalculationFailure;
+  endif
+
   O_ProjectedRevenueSeries = cat(2, V_PastRevenueSeries(1:end-1),
                             V_GrowthRevenueSeries(1:end-1),
                             V_WindDownRevenueSeries(1:end-1),
