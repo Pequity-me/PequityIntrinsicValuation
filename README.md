@@ -13,7 +13,7 @@ Install matlab and octave then run the `TestBench.m` which provides a sample usa
   I_YearlyFinancialEntries[1].Revenue, I_YearlyFinancialEntries[1].CashFlow, 
   ...);
   ```
-The model was used as a backend in combination with a REST API component (https://github.com/Pequity-me/pequity-rest)[pequity-rest] for pequity marketplace and valuation app, but it doesn't depend on the REST API and can be executed locally in a standard matlab/octave environment .
+The model was used as a backend in combination with a REST API component [pequity-rest](https://github.com/Pequity-me/pequity-rest) for pequity marketplace and valuation app, but it doesn't depend on the REST API and can be executed locally in a standard matlab/octave environment .
 
 A nice tutorial to use the input parameters (unfortunately in arabic only) can be found [here](https://www.facebook.com/pequity/posts/pfbid02CndbWjaCzaNFiFiJP9n7oVrKM6HBhJnUzxURNmF6HsxAb9U16TN1VvfctKVF9Uhql). Facebook translation should be helpful, otherwise the paramters are explanatory : inputs start with `I_` and outputs with `O_`. When executing the `RunValuation()` function the outputs will be populated in addition to graphs plotting the outputs. 
 
